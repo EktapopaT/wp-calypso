@@ -26,7 +26,7 @@ const noop = () => {};
  * @return {String} checked value
  */
 function checkTimeValue( value ) {
-	if ( value !== '0' && value !== '00' && ( value[0] === '0' || Number( value ) > 99 ) ) {
+	if ( value !== '0' && value !== '00' && ( value[ 0 ] === '0' || Number( value ) > 99 ) ) {
 		value = value.substr( 1 );
 	}
 
@@ -38,17 +38,24 @@ function checkTimeValue( value ) {
 }
 
 class PostScheduleClock extends Component {
+	constructor( props ) {
+		super( props );
+
+		// bounds
+		this.setTime = this.setTime.bind( this );
+		this.adjustHour = this.handleKeyDown.bind( this, 'hour' );
+		this.adjustMinute = this.handleKeyDown.bind( this, 'minute' );
+	}
 
 	handleKeyDown( field, event ) {
-		var operation = event.keyCode - 39,
-			value = Number( event.target.value ),
-			modifiers = this.getTimeValues();
+		const operation = event.keyCode - 39;
+		const modifiers = this.getTimeValues();
 
 		if ( ! ( -1 === operation || 1 === operation ) ) {
 			return null;
 		}
 
-		value -= operation;
+		let value = Number( event.target.value ) - operation;
 
 		if ( 'hour' === field ) {
 			value = value > 23 ? 0 : value;
@@ -60,13 +67,13 @@ class PostScheduleClock extends Component {
 
 		modifiers[ field ] = value;
 
-		this.setTime( modifiers );
+		this.setTime( event, modifiers );
 	}
 
 	getTimeValues() {
-		var modifiers = {},
-			hour = checkTimeValue( this.refs.timeHourRef.value ),
-			minute = checkTimeValue( this.refs.timeMinuteRef.value );
+		const modifiers = {};
+		const hour = checkTimeValue( this.refs.timeHourRef.value );
+		const minute = checkTimeValue( this.refs.timeMinuteRef.value );
 
 		if ( false !== hour && hour < 24 ) {
 			modifiers.hour = Number( hour );
@@ -79,8 +86,8 @@ class PostScheduleClock extends Component {
 		return modifiers;
 	}
 
-	setTime( modifiers ) {
-		let date = i18n.moment( this.props.date ).set( modifiers );
+	setTime( event, modifiers = this.getTimeValues() ) {
+		const date = i18n.moment( this.props.date ).set( modifiers );
 		this.props.onChange( date, modifiers );
 	}
 
@@ -88,27 +95,23 @@ class PostScheduleClock extends Component {
 		return (
 			<div className="post-schedule__clock">
 				<input
-					className="post-schedule__clock_time"
+					className="post-schedule__clock-time"
 					name="post-schedule__clock_hour"
 					ref="timeHourRef"
 					value={ this.props.date.format( 'HH' ) }
-					onChange={ () => {
-						this.setTime( this.getTimeValues() );
-					} }
-					onKeyDown={ this.handleKeyDown.bind( this, 'hour' ) }
+					onChange={ this.setTime }
+					onKeyDown={ this.adjustHour }
 					type="text" />
 
 				<span className="post-schedule__clock-divisor">:</span>
 
 				<input
-					className="post-schedule__clock_time"
+					className="post-schedule__clock-time"
 					name="post-schedule__clock_minute"
 					ref="timeMinuteRef"
 					value={ this.props.date.format( 'mm' ) }
-					onChange={ () => {
-						this.setTime( this.getTimeValues() );
-					} }
-					onKeyDown={ this.handleKeyDown.bind( this, 'minute' ) }
+					onChange={ this.setTime }
+					onKeyDown={ this.adjustMinute }
 					type="text" />
 
 				{ this.renderTimezoneBox() }
@@ -124,11 +127,11 @@ class PostScheduleClock extends Component {
 		let diffInHours, formatZ;
 
 		if ( this.props.timezone ) {
-			let tzDate = this.props.date.clone().tz( this.props.timezone );
+			const tzDate = this.props.date.clone().tz( this.props.timezone );
 			diffInHours = tzDate.utcOffset() - i18n.moment().utcOffset();
 			formatZ = tzDate.format( ' Z ' );
 		} else if ( utils.isValidGMTOffset( this.props.gmtOffset ) ) {
-			let utcDate = this.props.date.clone().utcOffset( this.props.gmtOffset );
+			const utcDate = this.props.date.clone().utcOffset( this.props.gmtOffset );
 			diffInHours = utcDate.utcOffset() - i18n.moment().utcOffset();
 			formatZ = utcDate.format( ' Z ' );
 		}
@@ -166,7 +169,7 @@ class PostScheduleClock extends Component {
 			</span>
 		);
 	}
-};
+}
 
 /**
  * Statics
