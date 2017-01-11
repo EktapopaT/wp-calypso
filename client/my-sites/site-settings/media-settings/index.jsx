@@ -24,8 +24,8 @@ import {
 	getJetpackSetting,
 	isRequestingJetpackSettings,
 	isUpdatingJetpackSettings
-} from 'state/jetpack-settings/settings/selectors';
-import { updateSettings } from 'state/jetpack-settings/settings/actions';
+} from 'state/jetpack/settings/selectors';
+import { updateSettings } from 'state/jetpack/settings/actions';
 
 class MediaSettings extends Component {
 	constructor( props ) {
